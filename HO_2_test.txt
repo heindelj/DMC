@@ -1,4 +1,4 @@
 2
 I am a comment line! Below is a deformed water molecule :(
-X 1.0 0.0 0.0
+X 0.0 0.0 0.0
 X 0.0 0.0 0.0
