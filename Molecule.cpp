@@ -21,7 +21,7 @@ Molecule::~Molecule()
 	m_AtomLabels.erase(m_AtomLabels.begin(), m_AtomLabels.end());
 }
 
-void Molecule::readXYZ(std::string file)
+void Molecule::readXYZ(const std::string& file)
 {
 	if (!std::filesystem::exists(file))
 	{

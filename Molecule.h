@@ -33,7 +33,7 @@ public:
 	void setEnergy(double energy);
 
 private:
-	void readXYZ(std::string file);
+	void readXYZ(const std::string& file);
 	void setMassesFromInput(atomicMasses massMap);
 };
 

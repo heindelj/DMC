@@ -1,11 +1,11 @@
 #include "DMC.h"
 #include "LogDMCOutput.h"
+#include "Timer.h"
 
 DMC::DMC(Potential* potential, inputFile input)
-	: m_Potential(potential)
+	: m_Potential(potential), m_Input(input)
 {
 	m_RefEnergy = 0.0;
-	m_Input = input;
 
 	// input file variables
 	m_NumDesiredWalkers = stoi(input.m_InputArgs["NUMWALKERS"]);
@@ -23,6 +23,9 @@ void DMC::initDMC(std::string initFile, std::vector<Molecule>& walkers)
 {
 	for (int i = 0; i < m_NumDesiredWalkers; i++)
 		walkers.push_back(Molecule(initFile));
+	// all molecules have same atoms, so can just look at one molecule
+	for (auto& mass : m_Walkers[0].getMass())
+		m_Sigmas.push_back(sqrt(m_dt / mass));
 }
 
 void DMC::calcRefEnergy() {}
@@ -72,14 +75,12 @@ void DMC::moveWalker(Molecule& walker)
 	std::vector<glm::vec3>* coords = walker.getCoordinatesPointer();
 	for (int i = 0; i < (*coords).size(); i++)
 	{
-		double sigma = glm::sqrt(m_dt / (*mass)[i]);
-		(*coords)[i] += glm::vec3(sampleNormal(0.0, sigma),
-			sampleNormal(0.0, sigma),
-			sampleNormal(0.0, sigma));
+		(*coords)[i] += glm::vec3(sampleNormal(0.0, m_Sigmas[i]),
+			sampleNormal(0.0, m_Sigmas[i]),
+			sampleNormal(0.0, m_Sigmas[i]));
 	}
 }
 
-// most likely T is either std::vector or std::array
 template <typename T>
 void DMC::moveWalkers(T& walkers)
 {
@@ -212,8 +213,11 @@ void DMC_Continuous::runDMC()
 	for (int i = 0; i < m_MaxSteps; i++)
 	{
 		moveWalkers(m_Walkers);
+
 		calcWalkerEnergies(m_Walkers);
+
 		updateWeights();
+
 		if (i >= logger.m_RunningAverageDelay)
 		{
 			m_RunningAverageRefEnergy.push_back(m_RefEnergy);
@@ -223,11 +227,9 @@ void DMC_Continuous::runDMC()
 	}
 }
 
-
 void DMC_Continuous::updateWeights()
 {
 	calcRefEnergy();
-	// TODO: parallelize this
 	for (int i = 0; i < m_Walkers.size(); i++)
 	{
 		m_Weights[i] *= glm::exp((m_RefEnergy - m_Walkers[i].getEnergy()) * m_dt);
@@ -236,7 +238,7 @@ void DMC_Continuous::updateWeights()
 	}
 }
 
-// finds largest weight walker and cuts its weight in half
+// find largest weight walker and cut its weight in half
 // while copying the walker to the index provided
 void DMC_Continuous::redistributeWeight(int index)
 {

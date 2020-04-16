@@ -201,9 +201,9 @@
     <ClInclude Include="DMC.h" />
     <ClInclude Include="LogDMCOutput.h" />
     <ClInclude Include="readInputFile.h" />
-    <ClInclude Include="Timer.h" />
     <ClInclude Include="Molecule.h" />
     <ClInclude Include="Potential.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="HO_2_test.txt" />

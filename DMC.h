@@ -12,10 +12,11 @@
 #include <time.h>      // seed for random numbers
 #include <iostream>	   // logging
 #include <memory>      // unique_ptr
-#include <algorithm>   // for_each, max_element
+#include <algorithm>   // for_each
 #include <execution>   // par_unseq
 #include <numeric>     // accumulate
 #include <iterator>    // distance
+#include <math.h>      // sqrt
 
 class DMC
 {
@@ -26,8 +27,9 @@ public:
 	double getRefEnergy();
 
 protected:
-	std::vector<Molecule> m_Walkers; //contains all currently alive walkers
-	std::vector<double> m_Weights; // contains weights associated with all walkers
+	std::vector<Molecule> m_Walkers; // contains all currently alive walkers
+	std::vector<double> m_Weights;   // contains weights associated with all walkers
+	std::vector<double> m_Sigmas;    // contains the std. dev. for each mass (compute only once)
 
 	void initDMC(std::string initFile, std::vector<Molecule>& walkers);
 
